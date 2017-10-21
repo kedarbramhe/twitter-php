@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Home</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  </head>
+  <body ng-app = 'formApp' ng-controller = 'formController'>
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">
+            <img alt="Brand" height="42" width="42" src="https://d30y9cdsu7xlg0.cloudfront.net/png/80049-200.png">
+          </a>
+        </div>
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+     <ul class="nav navbar-nav">
+       <li class="active"><a href="#">Home <span class="sr-only">(current)</span></a></li>
+       <li><a href="#">Followers</a></li>
+       <li><a href="#">Following</a></li>
+
+     </ul>
+   </div>
+      </div>
+    </nav>
+
+  <div class="container">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <div class="panel-title">
+          <h3>Home</h3>
+        </div>
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-md-4">
+              Details
+            </div>
+            <div class="col-md-4">
+              <div class="tweet">
+                <textarea name="tweet" ng-model="myInput" ng-maxlength="140" rows="3" cols="35" placeholder="What's happening?"></textarea>
+
+                <button type="button" ng-click='sendTweet()'>Tweet</button>
+                <p>
+    {{140 - myInput.length}} remaining
+</p>
+                <h1 ng-if="myInput.$valid">The value is too long</h1>
+
+
+              </div>
+              News Feed
+              <div class="feed" ng-repeat='row in tweetData.stream | orderBy:"timestamp"'>
+                <div class="panel panel-default">
+                  <div class="panel-heading">
+                    {{row.name}}
+                    {{row.timestamp}}
+                  </div>
+  <div class="panel-body">
+    {{row.tweet}}
+  </div>
+</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+
+            </div>
+          </div>
+        </div>
+
+  </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.0/angular.min.js"></script>
+
+    <script type="text/javascript">
+      var formApp = angular.module('formApp',[]);
+
+      formApp.controller('formController',function($scope,$http){
+        $scope.formData = {};
+        $scope.sendTweet = function(){
+        api_key = localStorage.getItem('api_key');
+        tweet = $scope.myInput;
+        $scope.data={
+          api_key : api_key,
+          tweet : tweet
+        }
+        $http({
+         method  : 'POST',
+         url     : 'http://localhost:8888/haptik_twitter_api/api/public/tweet',
+         data    : $.param($scope.data),  // pass in data as strings
+         headers : { 'Content-Type': 'application/x-www-form-urlencoded' }  // set the headers so angular passing info as form data (not request payload)
+       }).success(function(data){
+         $scope.myInput = "";
+         alert('success');
+       })
+
+}
+
+$scope.loadData = function(){
+
+  $scope.api_key = localStorage.getItem('api_key');
+  $scope.data = {
+    api_key : $scope.api_key
+  }
+  $http({
+   method  : 'POST',
+   url     : 'http://localhost:8888/haptik_twitter_api/api/public/tweet/stream',
+   data    : $.param($scope.data),  // pass in data as strings
+   headers : { 'Content-Type': 'application/x-www-form-urlencoded' }  // set the headers so angular passing info as form data (not request payload)
+ }).success(function(data){
+    $scope.tweetData = data;
+
+   debugger;
+
+ })
+
+}
+$scope.loadData();
+
+
+
+
+      });
+    </script>
+  </body>
+</html>
